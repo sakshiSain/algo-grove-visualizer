@@ -1,73 +1,34 @@
-# Welcome to your Lovable project
+# Welcome to my project: Minimum Spanning Tree Visualizer: Prim’s vs Kruskal’s Algorithm
 
 ## Project info
+**Overview**
+This project is an interactive web application that visually compares two classical algorithms for finding the Minimum Spanning Tree (MST) of a weighted graph: Prim’s Algorithm and Kruskal’s Algorithm.
+The app provides step-by-step animated visualizations to demonstrate how each algorithm constructs the MST, helping users understand the core differences between them through an intuitive, educational interface.
 
-**URL**: https://lovable.dev/projects/2a0595bb-c2c4-44e1-8963-b2df7c84e858
+**Features**
+Side-by-side visualization of Prim’s and Kruskal’s algorithms on the same graph.
+Dynamic graph rendering with nodes and weighted edges.
+Stepwise animation of MST construction:
+Prim’s grows the MST vertex by vertex, always choosing the smallest edge connecting to new nodes.
+Kruskal’s adds edges in ascending order of weight while avoiding cycles using union-find.
+Real-time display of current MST edges, total MST cost, and decision logs for each step.
+Interactive UI that allows users to explore and understand MST algorithms visually.
+Responsive and mobile-friendly design with clear legends and color coding.
 
-## How can I edit this code?
+**Technologies Used**
+React and TypeScript for building a robust frontend.
+Tailwind CSS and shadcn-ui for styling and UI components.
+Vite as the build tool and development server.
+Custom graph visualization and animation logic implemented with JavaScript and React hooks.
 
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/2a0595bb-c2c4-44e1-8963-b2df7c84e858) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+**Installation & Development**
+To run the project locally:
+git clone <REPO_URL>
+cd <PROJECT_DIRECTORY>
+npm install
 npm run dev
-```
 
-**Edit a file directly in GitHub**
+The app can be deployed using any static hosting service that supports React apps (e.g., Vercel, Netlify). Build the production version with:
+npm run build
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
 
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/2a0595bb-c2c4-44e1-8963-b2df7c84e858) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
