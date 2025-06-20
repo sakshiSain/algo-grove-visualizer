@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Play, Pause, RotateCcw, Info } from 'lucide-react';
+import { Play, Pause, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import GraphVisualizer from '@/components/GraphVisualizer';
 import AlgorithmExplanation from '@/components/AlgorithmExplanation';
@@ -45,8 +45,10 @@ const sampleGraph = {
 };
 
 const Index = () => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentStep, setCurrentStep] = useState(0);
+  const [isPrimPlaying, setIsPrimPlaying] = useState(false);
+  const [isKruskalPlaying, setIsKruskalPlaying] = useState(false);
+  const [primStep, setPrimStep] = useState(0);
+  const [kruskalStep, setKruskalStep] = useState(0);
   const [primMST, setPrimMST] = useState<string[]>([]);
   const [kruskalMST, setKruskalMST] = useState<string[]>([]);
   const [primCost, setPrimCost] = useState(0);
@@ -56,23 +58,38 @@ const Index = () => {
   const [graph] = useState(sampleGraph);
   const { toast } = useToast();
 
-  const resetVisualization = useCallback(() => {
-    setIsPlaying(false);
-    setCurrentStep(0);
+  const resetPrimVisualization = useCallback(() => {
+    setIsPrimPlaying(false);
+    setPrimStep(0);
     setPrimMST([]);
-    setKruskalMST([]);
     setPrimCost(0);
-    setKruskalCost(0);
     setPrimLog([]);
+  }, []);
+
+  const resetKruskalVisualization = useCallback(() => {
+    setIsKruskalPlaying(false);
+    setKruskalStep(0);
+    setKruskalMST([]);
+    setKruskalCost(0);
     setKruskalLog([]);
   }, []);
 
-  const togglePlayPause = () => {
-    setIsPlaying(!isPlaying);
-    if (!isPlaying && currentStep === 0) {
+  const togglePrimPlayPause = () => {
+    setIsPrimPlaying(!isPrimPlaying);
+    if (!isPrimPlaying && primStep === 0) {
       toast({
-        title: "Visualization Started",
-        description: "Watch both algorithms find the MST step by step!",
+        title: "Prim's Algorithm Started",
+        description: "Watch the MST grow from vertex A!",
+      });
+    }
+  };
+
+  const toggleKruskalPlayPause = () => {
+    setIsKruskalPlaying(!isKruskalPlaying);
+    if (!isKruskalPlaying && kruskalStep === 0) {
+      toast({
+        title: "Kruskal's Algorithm Started",
+        description: "Watch edges being added by weight!",
       });
     }
   };
@@ -143,22 +160,21 @@ const Index = () => {
     }
   }, []);
 
-  // Animation loop
+  // Animation loop for Prim's
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
-    if (isPlaying) {
+    if (isPrimPlaying) {
       interval = setInterval(() => {
-        setCurrentStep(prev => {
+        setPrimStep(prev => {
           const nextStep = prev + 1;
           runPrimsStep(nextStep);
-          runKruskalsStep(nextStep);
           
           if (nextStep >= 10) {
-            setIsPlaying(false);
+            setIsPrimPlaying(false);
             toast({
-              title: "Visualization Complete!",
-              description: `Both algorithms found MST with cost ${primCost || kruskalCost}`,
+              title: "Prim's Algorithm Complete!",
+              description: `MST found with cost ${primCost}`,
             });
           }
           
@@ -168,15 +184,46 @@ const Index = () => {
     }
 
     return () => clearInterval(interval);
-  }, [isPlaying, runPrimsStep, runKruskalsStep, primCost, kruskalCost, toast]);
+  }, [isPrimPlaying, runPrimsStep, primCost, toast]);
+
+  // Animation loop for Kruskal's
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    if (isKruskalPlaying) {
+      interval = setInterval(() => {
+        setKruskalStep(prev => {
+          const nextStep = prev + 1;
+          runKruskalsStep(nextStep);
+          
+          if (nextStep >= 10) {
+            setIsKruskalPlaying(false);
+            toast({
+              title: "Kruskal's Algorithm Complete!",
+              description: `MST found with cost ${kruskalCost}`,
+            });
+          }
+          
+          return nextStep;
+        });
+      }, 1500);
+    }
+
+    return () => clearInterval(interval);
+  }, [isKruskalPlaying, runKruskalsStep, kruskalCost, toast]);
 
   // Initialize first step
   useEffect(() => {
-    if (currentStep === 0) {
+    if (primStep === 0) {
       runPrimsStep(0);
+    }
+  }, [primStep, runPrimsStep]);
+
+  useEffect(() => {
+    if (kruskalStep === 0) {
       runKruskalsStep(0);
     }
-  }, [currentStep, runPrimsStep, runKruskalsStep]);
+  }, [kruskalStep, runKruskalsStep]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4">
@@ -189,23 +236,6 @@ const Index = () => {
           <p className="text-xl text-gray-600 mb-4">
             Prim's vs Kruskal's Algorithm Comparison
           </p>
-          
-          {/* Controls */}
-          <div className="flex justify-center space-x-4">
-            <Button
-              onClick={togglePlayPause}
-              className="flex items-center space-x-2"
-              variant={isPlaying ? "secondary" : "default"}
-            >
-              {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-              <span>{isPlaying ? 'Pause' : 'Start'}</span>
-            </Button>
-            
-            <Button onClick={resetVisualization} variant="outline">
-              <RotateCcw className="w-4 h-4 mr-2" />
-              Reset
-            </Button>
-          </div>
         </div>
 
         {/* Main Visualization Panels */}
@@ -221,11 +251,29 @@ const Index = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
+              {/* Controls for Prim's */}
+              <div className="flex justify-center space-x-2 mb-4">
+                <Button
+                  onClick={togglePrimPlayPause}
+                  className="flex items-center space-x-2"
+                  variant={isPrimPlaying ? "secondary" : "default"}
+                  size="sm"
+                >
+                  {isPrimPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                  <span>{isPrimPlaying ? 'Pause' : 'Start'}</span>
+                </Button>
+                
+                <Button onClick={resetPrimVisualization} variant="outline" size="sm">
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                  Reset
+                </Button>
+              </div>
+
               <GraphVisualizer
                 graph={graph}
                 mstEdges={primMST}
                 algorithmType="prim"
-                currentStep={currentStep}
+                currentStep={primStep}
               />
               
               {/* Prim's Log */}
@@ -253,11 +301,29 @@ const Index = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
+              {/* Controls for Kruskal's */}
+              <div className="flex justify-center space-x-2 mb-4">
+                <Button
+                  onClick={toggleKruskalPlayPause}
+                  className="flex items-center space-x-2"
+                  variant={isKruskalPlaying ? "secondary" : "default"}
+                  size="sm"
+                >
+                  {isKruskalPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                  <span>{isKruskalPlaying ? 'Pause' : 'Start'}</span>
+                </Button>
+                
+                <Button onClick={resetKruskalVisualization} variant="outline" size="sm">
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                  Reset
+                </Button>
+              </div>
+
               <GraphVisualizer
                 graph={graph}
                 mstEdges={kruskalMST}
                 algorithmType="kruskal"
-                currentStep={currentStep}
+                currentStep={kruskalStep}
               />
               
               {/* Kruskal's Log */}
@@ -280,36 +346,6 @@ const Index = () => {
 
         {/* Comparison Table */}
         <ComparisonTable />
-
-        {/* Legend */}
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Info className="w-5 h-5 mr-2" />
-              Legend
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 bg-graph-node rounded-full"></div>
-                <span className="text-sm">Graph Node</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-1 bg-graph-edge"></div>
-                <span className="text-sm">Graph Edge</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-1 bg-mst-edge"></div>
-                <span className="text-sm">MST Edge</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-1 bg-active-edge animate-pulse"></div>
-                <span className="text-sm">Active Edge</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
